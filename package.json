@@ -8,11 +8,10 @@
     "start": "next start -p 3000"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.26.0",
     "next": "14.0.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "sendgrid": "^7.6.0",
-    "@sendgrid/mail": "^7.9.0"
+    "react-dom": "18.2.0"
   }
 }
