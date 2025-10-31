@@ -11,8 +11,23 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
     my.set(mouse.y || 0);
   }, [mouse.x, mouse.y, mx, my]);
 
-  const x = useSpring(useTransform(mx, v => (v - window.innerWidth/2) / 30), { stiffness: 25, damping: 30 });
-  const y = useSpring(useTransform(my, v => (v - window.innerHeight/2) / 30), { stiffness: 25, damping: 30 });
+  // ✅ Only use window inside useMemo (browser only)
+  const [center, setCenter] = React.useState({ x: 0, y: 0 });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCenter({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    }
+  }, []);
+
+  const x = useSpring(
+    useTransform(mx, (v) => (v - center.x) / 30),
+    { stiffness: 25, damping: 30 }
+  );
+  const y = useSpring(
+    useTransform(my, (v) => (v - center.y) / 30),
+    { stiffness: 25, damping: 30 }
+  );
 
   const scale = useTransform(scrollYProgress ?? 0, [0, 1], [1.1, 0.7]);
   const opacity = useTransform(scrollYProgress ?? 0, [0, 0.4, 1], [0.8, 0.4, 0]);
@@ -23,7 +38,11 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
       style={{ x, y, scale, opacity }}
       aria-hidden
     >
-      <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" className="orb-svg">
+      <svg
+        viewBox="0 0 400 400"
+        preserveAspectRatio="xMidYMid meet"
+        className="orb-svg"
+      >
         <defs>
           <radialGradient id="g1" cx="30%" cy="30%">
             <stop offset="0%" stopColor="#00e7ff" stopOpacity="0.95" />
@@ -37,13 +56,18 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
           </radialGradient>
           <filter id="f1" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="18" result="blur" />
-            <feColorMatrix type="matrix" values="1 0 0 0 0   0 1 0 0 0   0 0 1 0 0   0 0 0 0.6 0"/>
+            <feColorMatrix
+              type="matrix"
+              values="1 0 0 0 0   0 1 0 0 0   0 0 1 0 0   0 0 0 0.6 0"
+            />
           </filter>
         </defs>
+
         <g filter="url(#f1)">
           <circle cx="200" cy="200" r="160" fill="url(#g1)" />
           <circle cx="210" cy="210" r="120" fill="url(#g2)" />
         </g>
+
         <g style={{ transformOrigin: "200px 200px" }}>
           <motion.path
             d="M200 30 a170 170 0 1 0 0.001 0"
