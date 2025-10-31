@@ -7,6 +7,7 @@ import Orb from "../components/Orb";
 import FeatureGrid from "../components/FeatureGrid";
 import WaitlistModal from "../components/WaitlistModal";
 import { supabase } from "../lib/supabaseClient";
+import React from "react";
 
 export default function Home() {
   const [count, setCount] = useState(null);
@@ -56,6 +57,7 @@ export default function Home() {
   };
 
   return (
+  <React.Suspense fallback={<div style={{ color: "white", padding: 50 }}>Loading...</div>}>
     <>
       <Head>
         <title>AutoDesk — Your computer, finally self-cleaning</title>
@@ -66,10 +68,6 @@ export default function Home() {
       </Head>
 
       <div className="heavy-root">
-        <div className="bg-visuals" aria-hidden>
-          <Orb />
-        </div>
-
         <header className="site-header">
           <div className="brand">
             <div className="logo-pill" />
@@ -100,7 +98,6 @@ export default function Home() {
               />
 
               <div className="big-metrics">
-                {/* Random 50 Lifetime Pro */}
                 <motion.div
                   className="metric-card"
                   whileHover={{ y: -6 }}
@@ -228,5 +225,7 @@ export default function Home() {
         />
       </div>
     </>
-  );
+  </React.Suspense>
+);
+
 }
