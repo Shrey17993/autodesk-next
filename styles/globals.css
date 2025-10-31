@@ -353,17 +353,64 @@ button:hover, .cta-button:hover {
   box-shadow: 0 0 10px rgba(0,255,255,0.2);
 }
 /* === Animated Orb Styling === */
-.orb-animated {
-  position: absolute;
-  top: 10%;
-  left: 60%;
-  width: 400px;
-  height: 400px;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  z-index: -5;
-  will-change: transform, opacity;
+/* === Orb: fixed, non-intrusive, responsive (replace previous .orb-animated) === */
+
+html, body {
+  /* safety: prevent unwanted horizontal scroll from large fixed elements */
+  overflow-x: hidden;
 }
+
+/* Orb wrapper - fixed so it never affects document flow/scroll */
+.orb-animated {
+  position: fixed;            /* key change — no longer contributes to page height */
+  top: 10vh;                  /* relative to viewport, moves up/down with viewport height */
+  left: 50%;                  /* center horizontally */
+  transform: translateX(-50%);/* true horizontal centering */
+  width: clamp(220px, 38vw, 420px); /* responsive sizing */
+  height: clamp(220px, 38vw, 420px);
+  pointer-events: none;       /* don't capture mouse events */
+  mix-blend-mode: screen;
+  z-index: -10;               /* behind main content */
+  will-change: transform, opacity;
+  overflow: visible;          /* let inner glows show without creating scrollbars */
+  display: block;
+  opacity: 0.65;              /* slightly dim to keep text readable */
+  filter: blur(64px);
+}
+
+/* inner core + ring (if you use .orb-core and .orb-ring) */
+.orb-animated .orb-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #00e7ff 0%, #9146ff 64%, rgba(0,0,0,0) 100%);
+  opacity: 0.9;
+}
+
+.orb-animated .orb-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 140%;
+  height: 140%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.06);
+  box-shadow: 0 0 60px rgba(0,231,255,0.06);
+  pointer-events: none;
+}
+
+/* reduce influence on small screens */
+@media (max-width: 900px) {
+  .orb-animated {
+    top: -6vh;
+    width: clamp(160px, 48vw, 300px);
+    height: clamp(160px, 48vw, 300px);
+    opacity: 0.45;
+    filter: blur(48px);
+  }
+}
+
 
 .orb-core {
   width: 100%;
@@ -395,3 +442,26 @@ button:hover, .cta-button:hover {
   }
 }
 
+/* corrected orb fixed styling */
+.orb-fixed {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(200px, 30vw, 350px);
+  height: clamp(200px, 30vw, 350px);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: -10;
+  overflow: visible; /* ensure no internal scroll */
+}
+
+.orb-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+html, body {
+  overflow-x: hidden; /* prevent horizontal scroll */
+}
