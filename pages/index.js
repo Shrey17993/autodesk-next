@@ -1,19 +1,26 @@
 import Head from "next/head";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Home() {
   const [form, setForm] = useState({ name: "", email: "" });
   const [status, setStatus] = useState("");
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Submitting...");
-
     const { error } = await supabase.from("waitlist").insert([form]);
     setStatus(error ? "DB Error ❌" : "✅ Added to waitlist!");
   };
+
+  // Track mouse for interactive orb
+  useEffect(() => {
+    const handleMouse = (e) => setMouse({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
 
   return (
     <>
@@ -22,76 +29,113 @@ export default function Home() {
       </Head>
 
       <main className="heavy-root">
+        {/* Background gradient glow */}
+        <motion.div
+          className="background-glow"
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        />
+
         {/* Hero Section */}
         <motion.section
           className="hero-section"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
           <div className="hero-grid">
             <div className="hero-text">
               <motion.h1
                 className="hero-title"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.08 },
+                  },
+                }}
               >
-                AutoDesk
+                {"AutoDesk".split("").map((char, i) => (
+                  <motion.span
+                    key={i}
+                    variants={{
+                      hidden: { opacity: 0, y: 40 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
               </motion.h1>
+
               <motion.p
                 className="hero-sub"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
               >
-                Auto tidy for your files.
-                <br />
                 Your computer, finally self-cleaning.
+                <br />
+                Local AI that declutters — privately.
               </motion.p>
 
               <div className="hero-ctas">
                 <motion.button
                   className="btn-primary"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Reserve your spot
                 </motion.button>
                 <motion.button
                   className="btn-ghost"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  How it works
+                  Learn more
                 </motion.button>
               </div>
             </div>
 
+            {/* Orb follows cursor */}
             <motion.div
-              className="hero-visual"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="orb"></div>
-            </motion.div>
+              className="orb"
+              animate={{
+                x: mouse.x / 50 - 30,
+                y: mouse.y / 50 - 30,
+              }}
+              transition={{ type: "spring", stiffness: 40, damping: 20 }}
+            />
           </div>
         </motion.section>
 
-        {/* Waitlist Section */}
+        {/* Waitlist */}
         <motion.section
           className="waitlist-section"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1 }}
         >
-          <h2 className="waitlist-title">
+          <motion.h2
+            className="waitlist-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             Random 50 get <span>Lifetime Pro</span> • 25% pre-launch
-          </h2>
+          </motion.h2>
 
-          <form onSubmit={handleSubmit} className="waitlist-form">
+          <motion.form
+            onSubmit={handleSubmit}
+            className="waitlist-form"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
             <input
               type="text"
               placeholder="Your name"
@@ -104,46 +148,52 @@ export default function Home() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
-            <button type="submit">Join waitlist</button>
-          </form>
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.05, boxShadow: "0 0 30px #00e7ff77" }}
+            >
+              Join waitlist
+            </motion.button>
+          </motion.form>
 
           {status && <p className="waitlist-status">{status}</p>}
         </motion.section>
 
-        {/* Features Section */}
-        <motion.section
-          className="features-heavy"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-        >
-          <h2 className="heavy-heading">How AutoDesk works</h2>
-          <p className="heavy-lead">
-            AutoDesk uses on-device AI to scan, rename, and declutter your files.
-            Your workspace — clean, private, and effortless.
-          </p>
+        {/* Features */}
+        <section className="features-heavy">
+          <motion.h2
+            className="heavy-heading"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            Features that feel magic
+          </motion.h2>
 
           <div className="features-grid">
             {[
-              ["Smart Rename", "Semantic file renaming based on content and date."],
-              ["Auto Sort", "Automatically group into Documents, Photos, Code."],
-              ["Duplicate Finder", "Detect & remove duplicate files safely."],
-              ["Privacy-First", "Local-first processing; never upload without consent."],
-              ["One-Click Cleanup", "Preview and apply fixes with confidence."],
-              ["Integrations", "Connect cloud drives & local folders (optional)."],
-            ].map(([title, desc]) => (
+              ["Smart Rename", "AI renaming that understands your files."],
+              ["Auto Sort", "Groups photos, docs, code with intent."],
+              ["Privacy-First", "100% on-device — zero uploads."],
+              ["Duplicate Finder", "Finds & removes copies instantly."],
+              ["One-Click Cleanup", "Preview and confirm changes safely."],
+              ["Integrations", "Connect drives seamlessly."],
+            ].map(([title, desc], i) => (
               <motion.div
-                key={title}
+                key={i}
                 className="feature-card"
-                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05, rotateX: 4, rotateY: 4 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
               >
-                <h3>★ {title}</h3>
+                <h3>{title}</h3>
                 <p>{desc}</p>
               </motion.div>
             ))}
           </div>
-        </motion.section>
+        </section>
 
         <footer className="site-foot">
           © AutoDesk • 2025 <br /> Privacy-first • Local-first • Fast

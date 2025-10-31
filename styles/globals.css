@@ -170,3 +170,70 @@ body {
   font-size: 14px;
   padding-bottom: 60px;
 }
+/* --- Extra Motion & Visual Layers --- */
+
+.background-glow {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(45deg, #00e7ff, #9146ff, #ff00c3, #00e7ff);
+  background-size: 400% 400%;
+  filter: blur(160px);
+  opacity: 0.1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  right: 10%;
+  top: 50%;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #00e7ff, #9146ff 80%);
+  filter: blur(50px);
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.feature-card {
+  transform-style: preserve-3d;
+  perspective: 800px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.feature-card:hover {
+  box-shadow: 0 0 40px rgba(0, 231, 255, 0.3);
+}
+
+.feature-card h3 {
+  background: linear-gradient(90deg, #00e7ff, #9146ff);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 22px;
+  margin-bottom: 10px;
+  font-family: "Poppins", sans-serif;
+}
+
+.feature-card p {
+  color: #aab7d4;
+  font-family: "Spectral", serif;
+}
+
+.hero-title span {
+  display: inline-block;
+}
+
+/* Glow border for form */
+.waitlist-form {
+  position: relative;
+  padding: 24px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background: linear-gradient(#101223, #101223) padding-box,
+    linear-gradient(90deg, #00e7ff, #9146ff) border-box;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+.waitlist-form:hover {
+  box-shadow: 0 0 40px rgba(0, 231, 255, 0.3);
+}
