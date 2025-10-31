@@ -18,7 +18,8 @@ export default function Hero({ onPrimary, onSecondary }) {
       </div>
 
       <div className="trust-row">
-        <div className="trust-pill">First 100 winners • 25% pre-launch</div>
+        <div className="trust-pill">Random 50 get Lifetime Pro • 25% pre-launch</div>
+
         <div className="micro-stats">No upload required • Runs locally</div>
       </div>
     </section>

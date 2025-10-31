@@ -69,11 +69,15 @@ export default function Home() {
                   <div className="metric-sub">First 100 get 1 month Pro</div>
                 </motion.div>
 
-                <motion.div className="metric-card alt" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <div className="metric-title">Pre-launch discount</div>
-                  <div className="metric-value">25%</div>
-                  <div className="metric-sub">Applied to early supporters</div>
-                </motion.div>
+                <motion.div className="metric-card" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
+  <div className="metric-title">Active waitlist</div>
+  <div className="metric-value">{count !== null ? count.toLocaleString() : "…"}</div>
+  <div className="metric-sub">
+  Random 50 get <span style={{background: "linear-gradient(90deg, var(--neon1), var(--neon2))", WebkitBackgroundClip: "text", color: "transparent", fontWeight: 700}}>Lifetime Pro</span>
+</div>
+
+</motion.div>
+
               </div>
             </div>
 
