@@ -1,183 +1,128 @@
 // pages/index.js
-console.log("SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log("SUPABASE_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Loaded ✅" : "Missing ❌");
-
-
+import Head from "next/head";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, Cpu, Users, Settings } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
-import { createClient } from '@supabase/supabase-js';
+import Hero from "../components/Hero";
+import Orb from "../components/Orb";
+import FeatureGrid from "../components/FeatureGrid";
+import WaitlistModal from "../components/WaitlistModal";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+export default function Home() {
+  const [count, setCount] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
 
-
-export default function AliveDashboard() {
-  const [users, setUsers] = useState(0);
-  const [sessions, setSessions] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const glowRef = useRef(null);
-
-  // 🟢 Realtime data stream from Supabase
   useEffect(() => {
-    async function init() {
-      const { count } = await supabase
-        .from("signups")
-        .select("*", { count: "exact", head: true });
-      setUsers(count || 0);
-      setSessions(Math.floor((count || 0) * 2.3));
-      setLoading(false);
-
-      // Live updates
-      const channel = supabase
-        .channel("db-changes")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "signups" },
-          async () => {
-            const { count } = await supabase
-              .from("signups")
-              .select("*", { count: "exact", head: true });
-            setUsers(count || 0);
-            setSessions(Math.floor((count || 0) * 2.3));
-          }
-        )
-        .subscribe();
-
-      return () => supabase.removeChannel(channel);
+    let mounted = true;
+    async function fetchCount() {
+      try {
+        const res = await fetch("/api/count");
+        const j = await res.json();
+        if (mounted) setCount(j.count ?? 0);
+      } catch (e) {
+        if (mounted) setCount(0);
+      }
     }
-
-    init();
-  }, []);
-
-  // 💡 Glow mouse effect
-  useEffect(() => {
-    const glow = glowRef.current;
-    if (!glow) return;
-    const move = (e) => {
-      glow.style.left = `${e.clientX}px`;
-      glow.style.top = `${e.clientY}px`;
-    };
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
+    fetchCount();
+    const iv = setInterval(fetchCount, 15000);
+    return () => { mounted = false; clearInterval(iv); };
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b] text-white flex">
-      {/* Glow Mouse Trail */}
-      <div
-        ref={glowRef}
-        className="pointer-events-none fixed w-80 h-80 bg-blue-600/20 rounded-full blur-[140px] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
-      ></div>
+    <>
+      <Head>
+        <title>AutoDesk — Your computer, finally self-cleaning</title>
+        <meta name="description" content="AutoDesk auto-organizes and declutters your files with privacy-first local AI." />
+      </Head>
 
-      {/* Animated Particles */}
-      {[...Array(40)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bg-blue-400/10 rounded-full"
-          style={{
-            width: Math.random() * 4 + 2,
-            height: Math.random() * 4 + 2,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, Math.random() * 50 - 25],
-            opacity: [0.2, 1, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 8 + 6,
-            repeat: Infinity,
-            repeatType: "mirror",
-          }}
-        />
-      ))}
-
-      {/* Sidebar */}
-      <motion.aside
-        initial={{ x: -80, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-64 bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col justify-between"
-      >
-        <div>
-          <h1 className="text-3xl font-orbitron tracking-widest bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 text-transparent bg-clip-text mb-10">
-            ALIVENET
-          </h1>
-          <nav className="space-y-3">
-            {[
-              { name: "Overview", icon: Activity },
-              { name: "Users", icon: Users },
-              { name: "AI Engine", icon: Cpu },
-              { name: "Settings", icon: Settings },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ scale: 1.1, x: 10 }}
-                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-gradient-to-r from-blue-500/20 to-cyan-400/10"
-              >
-                <item.icon size={20} className="text-blue-400" />
-                <span className="font-medium">{item.name}</span>
-              </motion.div>
-            ))}
-          </nav>
+      <div className="heavy-root">
+        <div className="bg-visuals" aria-hidden>
+          <Orb />
         </div>
-        <div className="text-sm text-gray-400">v3.9.1 • Synced</div>
-      </motion.aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-10 relative z-10">
-        <header className="flex justify-between items-center mb-10">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-semibold"
-          >
-            Welcome Back,{" "}
-            <span className="text-blue-400 bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500 text-transparent">
-              Operator
-            </span>
-          </motion.h2>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-xl shadow-blue-500/30" />
+        <header className="site-header">
+          <div className="brand">
+            <div className="logo-pill" />
+            <div>
+              <div className="brand-name">AutoDesk</div>
+              <div className="brand-tag">Auto tidy for your files</div>
+            </div>
+          </div>
+
+          <nav className="header-actions">
+            <div className="joined">{count !== null ? `${count.toLocaleString()} joined` : "—"}</div>
+            <button className="btn-ghost" onClick={() => setOpen(true)}>Join waitlist</button>
+          </nav>
         </header>
 
-        {/* Live Metrics */}
-        <div className="grid grid-cols-3 gap-6">
-          {[
-            { title: "Active Users", value: users },
-            { title: "AI Sessions", value: sessions },
-            { title: "Network", value: "Stable" },
-          ].map((card, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05 }}
-              className="p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-xl shadow-xl hover:shadow-blue-500/30 transition"
-            >
-              <h3 className="text-lg text-gray-300">{card.title}</h3>
-              <p className="text-4xl font-bold text-blue-400 mt-2">
-                {loading ? "…" : card.value}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+        <main className="page-container">
+          <section className="hero-and-metrics">
+            <div className="hero-left">
+              <Hero
+                onPrimary={() => setOpen(true)}
+                onSecondary={() => setStatusMsg("Demo coming soon — stay tuned!")}
+              />
+              <div className="big-metrics">
+                <motion.div className="metric-card" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
+                  <div className="metric-title">Active waitlist</div>
+                  <div className="metric-value">{count !== null ? count.toLocaleString() : "…"}</div>
+                  <div className="metric-sub">First 100 get 1 month Pro</div>
+                </motion.div>
 
-        {/* AI Core */}
-        <motion.div
-          className="mt-12 p-6 bg-gradient-to-r from-blue-600/20 via-cyan-500/10 to-purple-600/20 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl"
-          whileHover={{ scale: 1.01 }}
-        >
-          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-3">
-            <Cpu className="text-cyan-400" /> AI Core Status
-          </h2>
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Neural links active. Processing distributed consciousness signals.{" "}
-            <span className="text-blue-400 font-semibold animate-pulse">
-              Connection: Stable | Latency: 19ms | Mode: Autonomous
-            </span>
-          </p>
-        </motion.div>
-      </main>
-    </div>
+                <motion.div className="metric-card alt" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
+                  <div className="metric-title">Pre-launch discount</div>
+                  <div className="metric-value">25%</div>
+                  <div className="metric-sub">Applied to early supporters</div>
+                </motion.div>
+              </div>
+            </div>
+
+            <aside className="hero-right">
+              <motion.div className="launch-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+                <div className="launch-title">Launch Controls</div>
+                <div className="launch-sub">Admin tools (safe; requires secret)</div>
+
+                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                  <button className="btn-primary" onClick={() => setOpen(true)}>Reserve spot</button>
+                  <button className="btn-outline" onClick={async () => {
+                    const secret = prompt("Admin secret:");
+                    if (!secret) return;
+                    const res = await fetch("/api/draw-winners", { method: "POST", headers: { "x-admin-secret": secret }});
+                    const j = await res.json();
+                    if (res.ok) setStatusMsg(`Draw done — winners: ${j.winners ?? 0}`);
+                    else setStatusMsg(`Error: ${j.error || JSON.stringify(j)}`);
+                  }}>Draw winners</button>
+                </div>
+
+                {statusMsg && <div className="small muted" style={{ marginTop: 12 }}>{statusMsg}</div>}
+              </motion.div>
+
+              <motion.div className="visual-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                <div className="visual-title">How AutoDesk works</div>
+                <ol className="work-steps">
+                  <li><strong>Scan</strong> — Smart analyze files locally.</li>
+                  <li><strong>Suggest</strong> — Safe renames and groups.</li>
+                  <li><strong>Apply</strong> — One click to clean up.</li>
+                </ol>
+              </motion.div>
+            </aside>
+          </section>
+
+          <section className="features-heavy">
+            <h3 className="heavy-heading">Built for real life</h3>
+            <p className="heavy-lead">Enterprise core, consumer polish — AutoDesk automates the tedious file work so you can focus.</p>
+
+            <FeatureGrid />
+          </section>
+
+          <footer className="site-foot">
+            <div>© AutoDesk • 2025</div>
+            <div className="muted">Privacy-first • Local-first • Fast</div>
+          </footer>
+        </main>
+
+        <WaitlistModal open={open} onClose={() => setOpen(false)} onJoined={() => { setOpen(false); setStatusMsg("Thanks — you're on the list!"); }} />
+      </div>
+    </>
   );
 }
