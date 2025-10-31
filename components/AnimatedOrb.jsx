@@ -1,26 +1,45 @@
 // components/AnimatedOrb.jsx
 import React from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress }) {
-  // subtle parallax of inner gradients
+  // motion values for mouse
   const mx = useMotionValue(mouse.x || 0);
   const my = useMotionValue(mouse.y || 0);
-  React.useEffect(() => { mx.set(mouse.x || 0); my.set(mouse.y || 0); }, [mouse.x, mouse.y, mx, my]);
 
-  const x = useTransform(mx, v => v / 40 - 80);
-  const y = useTransform(my, v => v / 40 - 120);
-  const scale = useTransform(scrollYProgress ?? 0, [0, 1], [1.03, 0.85]);
+  React.useEffect(() => {
+    mx.set(mouse.x || 0);
+    my.set(mouse.y || 0);
+  }, [mouse.x, mouse.y, mx, my]);
+
+  // subtle parallax motion
+  const x = useSpring(useTransform(mx, (v) => v / 40 - 40), { stiffness: 25, damping: 40 });
+  const y = useSpring(useTransform(my, (v) => v / 40 - 60), { stiffness: 25, damping: 40 });
+
+  // scroll-based scale + fade
+  const scale = useTransform(scrollYProgress ?? 0, [0, 1], [1.05, 0.85]);
+  const opacity = useTransform(scrollYProgress ?? 0, [0, 1], [1, 0.7]);
 
   return (
     <motion.div
       className="orb-animated"
-      style={{ x, y, scale }}
+      style={{
+        x,
+        y,
+        scale,
+        opacity,
+        willChange: "transform, opacity",
+      }}
       aria-hidden
     >
-      {/* layered svg for depth lighting */}
-      <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" className="orb-svg">
+      {/* main glowing orb */}
+      <svg
+        viewBox="0 0 400 400"
+        preserveAspectRatio="xMidYMid meet"
+        className="orb-svg"
+      >
         <defs>
+          {/* gradients */}
           <radialGradient id="g1" cx="30%" cy="30%">
             <stop offset="0%" stopColor="#00e7ff" stopOpacity="0.95" />
             <stop offset="50%" stopColor="#6fc0ff" stopOpacity="0.25" />
@@ -31,9 +50,17 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
             <stop offset="60%" stopColor="#9146ff" stopOpacity="0.12" />
             <stop offset="100%" stopColor="transparent" stopOpacity="0" />
           </radialGradient>
+
+          {/* blur filter */}
           <filter id="f1" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="18" result="blur" />
-            <feColorMatrix type="matrix" values="1 0 0 0 0   0 1 0 0 0   0 0 1 0 0   0 0 0 0.7 0"/>
+            <feColorMatrix
+              type="matrix"
+              values="1 0 0 0 0  
+                      0 1 0 0 0  
+                      0 0 1 0 0  
+                      0 0 0 0.7 0"
+            />
           </filter>
         </defs>
 
@@ -42,7 +69,7 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
           <circle cx="210" cy="210" r="120" fill="url(#g2)" />
         </g>
 
-        {/* subtle rotating ring */}
+        {/* rotating subtle ring */}
         <g style={{ transformOrigin: "200px 200px" }}>
           <motion.path
             d="M200 30 a170 170 0 1 0 0.001 0"
@@ -50,7 +77,7 @@ export default function AnimatedOrb({ mouse = { x: 0, y: 0 }, scrollYProgress })
             strokeWidth="1.6"
             fill="none"
             animate={{ rotate: [0, 360] }}
-            transition={{ repeat: Infinity, duration: 32, ease: "linear" }}
+            transition={{ repeat: Infinity, duration: 36, ease: "linear" }}
           />
         </g>
       </svg>
