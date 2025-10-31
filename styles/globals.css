@@ -352,3 +352,46 @@ button:hover, .cta-button:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 0 10px rgba(0,255,255,0.2);
 }
+/* === Animated Orb Styling === */
+.orb-animated {
+  position: absolute;
+  top: 10%;
+  left: 60%;
+  width: 400px;
+  height: 400px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: -5;
+  will-change: transform, opacity;
+}
+
+.orb-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #00e7ff 0%, #9146ff 65%, transparent 100%);
+  opacity: 0.6;
+}
+
+.orb-ring {
+  position: absolute;
+  top: -15%;
+  left: -15%;
+  width: 130%;
+  height: 130%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 255, 0.25);
+  box-shadow: 0 0 80px rgba(0, 255, 255, 0.1);
+}
+
+@media (max-width: 900px) {
+  .orb-animated {
+    top: -5%;
+    left: 50%;
+    width: 240px;
+    height: 240px;
+    opacity: 0.4;
+    transform: translateX(-50%);
+  }
+}
+
