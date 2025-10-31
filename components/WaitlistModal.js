@@ -44,7 +44,7 @@ export default function WaitlistModal({ open, onClose, onJoined }) {
       <div style={{ width: 'min(540px,92%)', background:'#071317', padding:20, borderRadius:12, border:'1px solid rgba(255,255,255,0.03)' }}>
         <button onClick={onClose} style={{ float:'right', background:'transparent', border:0, color:'#9aa'}}>✕</button>
         <h3 style={{ marginTop:0 }}>Reserve your spot</h3>
-        <p style={{ color:'#9aa' }}>First 100 get 1 month Pro free. Pre-launch signups get 25% off for life.</p>
+        <p style={{ color:'#9aa' }}>Random 50 will get Lifetime Pro access. Early signups still get 25% off.</p>
         <form onSubmit={submit}>
           <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" style={inputStyle} />
           <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={inputStyle} />

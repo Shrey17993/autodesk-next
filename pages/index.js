@@ -6,12 +6,17 @@ import Hero from "../components/Hero";
 import Orb from "../components/Orb";
 import FeatureGrid from "../components/FeatureGrid";
 import WaitlistModal from "../components/WaitlistModal";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Home() {
   const [count, setCount] = useState(null);
   const [open, setOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
+  // Fetch waitlist count
   useEffect(() => {
     let mounted = true;
     async function fetchCount() {
@@ -28,11 +33,36 @@ export default function Home() {
     return () => { mounted = false; clearInterval(iv); };
   }, []);
 
+  // Handle form submit (join waitlist)
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatusMsg("");
+
+    const { error } = await supabase.from("signups").insert([
+      { name, email, tier: "waitlist" },
+    ]);
+
+    if (error) {
+      console.error(error);
+      setStatusMsg("❌ Database error: " + error.message);
+    } else {
+      setStatusMsg("✅ You're on the waitlist!");
+      setName("");
+      setEmail("");
+    }
+
+    setLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>AutoDesk — Your computer, finally self-cleaning</title>
-        <meta name="description" content="AutoDesk auto-organizes and declutters your files with privacy-first local AI." />
+        <meta
+          name="description"
+          content="AutoDesk auto-organizes and declutters your files with privacy-first local AI."
+        />
       </Head>
 
       <div className="heavy-root">
@@ -50,8 +80,12 @@ export default function Home() {
           </div>
 
           <nav className="header-actions">
-            <div className="joined">{count !== null ? `${count.toLocaleString()} joined` : "—"}</div>
-            <button className="btn-ghost" onClick={() => setOpen(true)}>Join waitlist</button>
+            <div className="joined">
+              {count !== null ? `${count.toLocaleString()} joined` : "—"}
+            </div>
+            <button className="btn-ghost" onClick={() => setOpen(true)}>
+              Join waitlist
+            </button>
           </nav>
         </header>
 
@@ -60,53 +94,110 @@ export default function Home() {
             <div className="hero-left">
               <Hero
                 onPrimary={() => setOpen(true)}
-                onSecondary={() => setStatusMsg("Demo coming soon — stay tuned!")}
+                onSecondary={() =>
+                  setStatusMsg("Demo coming soon — stay tuned!")
+                }
               />
+
               <div className="big-metrics">
-                <motion.div className="metric-card" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
+                {/* Random 50 Lifetime Pro */}
+                <motion.div
+                  className="metric-card"
+                  whileHover={{ y: -6 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <div className="metric-title">Active waitlist</div>
-                  <div className="metric-value">{count !== null ? count.toLocaleString() : "…"}</div>
-                  <div className="metric-sub">First 100 get 1 month Pro</div>
+                  <div className="metric-value">
+                    {count !== null ? count.toLocaleString() : "…"}
+                  </div>
+                  <div className="metric-sub">
+                    Random 50 get{" "}
+                    <span
+                      style={{
+                        background:
+                          "linear-gradient(90deg, var(--neon1), var(--neon2))",
+                        WebkitBackgroundClip: "text",
+                        color: "transparent",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Lifetime Pro
+                    </span>{" "}
+                    • 25% pre-launch
+                  </div>
                 </motion.div>
-
-                <motion.div className="metric-card" whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300 }}>
-  <div className="metric-title">Active waitlist</div>
-  <div className="metric-value">{count !== null ? count.toLocaleString() : "…"}</div>
-  <div className="metric-sub">
-  Random 50 get <span style={{background: "linear-gradient(90deg, var(--neon1), var(--neon2))", WebkitBackgroundClip: "text", color: "transparent", fontWeight: 700}}>Lifetime Pro</span>
-</div>
-
-</motion.div>
-
               </div>
             </div>
 
             <aside className="hero-right">
-              <motion.div className="launch-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-                <div className="launch-title">Launch Controls</div>
-                <div className="launch-sub">Admin tools (safe; requires secret)</div>
-
-                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-                  <button className="btn-primary" onClick={() => setOpen(true)}>Reserve spot</button>
-                  <button className="btn-outline" onClick={async () => {
-                    const secret = prompt("Admin secret:");
-                    if (!secret) return;
-                    const res = await fetch("/api/draw-winners", { method: "POST", headers: { "x-admin-secret": secret }});
-                    const j = await res.json();
-                    if (res.ok) setStatusMsg(`Draw done — winners: ${j.winners ?? 0}`);
-                    else setStatusMsg(`Error: ${j.error || JSON.stringify(j)}`);
-                  }}>Draw winners</button>
+              <motion.div
+                className="launch-card"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 }}
+              >
+                <div className="launch-title">Reserve your spot</div>
+                <div className="launch-sub">
+                  Random 50 get Lifetime Pro • 25% pre-launch
                 </div>
 
-                {statusMsg && <div className="small muted" style={{ marginTop: 12 }}>{statusMsg}</div>}
+                <form
+                  onSubmit={handleJoin}
+                  className="flex flex-col gap-3 mt-3"
+                  style={{ maxWidth: 320 }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="input"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="input"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary"
+                  >
+                    {loading ? "Joining..." : "Join waitlist"}
+                  </button>
+                </form>
+
+                {statusMsg && (
+                  <div
+                    className="small muted"
+                    style={{ marginTop: 12, color: "#9ef" }}
+                  >
+                    {statusMsg}
+                  </div>
+                )}
               </motion.div>
 
-              <motion.div className="visual-card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <motion.div
+                className="visual-card"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 <div className="visual-title">How AutoDesk works</div>
                 <ol className="work-steps">
-                  <li><strong>Scan</strong> — Smart analyze files locally.</li>
-                  <li><strong>Suggest</strong> — Safe renames and groups.</li>
-                  <li><strong>Apply</strong> — One click to clean up.</li>
+                  <li>
+                    <strong>Scan</strong> — Smart analyze files locally.
+                  </li>
+                  <li>
+                    <strong>Suggest</strong> — Safe renames and groups.
+                  </li>
+                  <li>
+                    <strong>Apply</strong> — One click to clean up.
+                  </li>
                 </ol>
               </motion.div>
             </aside>
@@ -114,8 +205,10 @@ export default function Home() {
 
           <section className="features-heavy">
             <h3 className="heavy-heading">Built for real life</h3>
-            <p className="heavy-lead">Enterprise core, consumer polish — AutoDesk automates the tedious file work so you can focus.</p>
-
+            <p className="heavy-lead">
+              Enterprise core, consumer polish — AutoDesk automates the tedious
+              file work so you can focus.
+            </p>
             <FeatureGrid />
           </section>
 
@@ -125,7 +218,14 @@ export default function Home() {
           </footer>
         </main>
 
-        <WaitlistModal open={open} onClose={() => setOpen(false)} onJoined={() => { setOpen(false); setStatusMsg("Thanks — you're on the list!"); }} />
+        <WaitlistModal
+          open={open}
+          onClose={() => setOpen(false)}
+          onJoined={() => {
+            setOpen(false);
+            setStatusMsg("Thanks — you're on the list!");
+          }}
+        />
       </div>
     </>
   );
