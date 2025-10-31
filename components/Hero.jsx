@@ -1,27 +1,55 @@
-// components/Hero.jsx
 import { motion } from "framer-motion";
 
-export default function Hero({ onPrimary, onSecondary }) {
+const reveal = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.6, ease: "easeOut" },
+  }),
+};
+
+export default function Hero({ onReserve, onPrimary, onSecondary }) {
+  const text = "Your computer, finally self-cleaning";
+
   return (
-    <section className="hero-block">
-      <motion.h1 initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="hero-title">
-        Your computer, <span className="glow-text">finally self-cleaning</span>
+    <div className="hero-block">
+      <div className="orb" />
+      <motion.h1
+        className="hero-title"
+        initial="hidden"
+        animate="visible"
+      >
+        {text.split("").map((char, i) => (
+          <motion.span key={i} variants={reveal} custom={i} style={{ display: "inline-block" }}>
+            {char}
+          </motion.span>
+        ))}
       </motion.h1>
 
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08 }} className="hero-desc">
-        AutoDesk intelligently organizes, renames and declutters your files — private by default, automated for life.
+      <motion.p
+        className="hero-sub"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
+      >
+        AutoDesk uses on-device AI to scan, rename, and declutter your files.  
+        Your workspace — clean, private, and effortless.
       </motion.p>
 
-      <div className="hero-ctas">
-        <motion.button whileHover={{ scale: 1.03 }} className="btn-primary large" onClick={onPrimary}>Reserve your spot</motion.button>
-        <motion.button whileHover={{ scale: 1.03 }} className="btn-ghost" onClick={onSecondary}>Watch demo</motion.button>
-      </div>
-
-      <div className="trust-row">
-        <div className="trust-pill">Random 50 get Lifetime Pro • 25% pre-launch</div>
-
-        <div className="micro-stats">No upload required • Runs locally</div>
-      </div>
-    </section>
+      <motion.div
+        className="hero-ctas"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+      >
+        <button className="btn-primary" onClick={onPrimary || onReserve}>
+          Reserve your spot
+        </button>
+        <button className="btn-ghost" onClick={onSecondary}>
+          How it works
+        </button>
+      </motion.div>
+    </div>
   );
 }
