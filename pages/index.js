@@ -1,231 +1,154 @@
-// pages/index.js
 import Head from "next/head";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Hero from "../components/Hero";
-import Orb from "../components/Orb";
-import FeatureGrid from "../components/FeatureGrid";
-import WaitlistModal from "../components/WaitlistModal";
+import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import React from "react";
 
 export default function Home() {
-  const [count, setCount] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [statusMsg, setStatusMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [form, setForm] = useState({ name: "", email: "" });
+  const [status, setStatus] = useState("");
 
-  // Fetch waitlist count
-  useEffect(() => {
-    let mounted = true;
-    async function fetchCount() {
-      try {
-        const res = await fetch("/api/count");
-        const j = await res.json();
-        if (mounted) setCount(j.count ?? 0);
-      } catch (e) {
-        if (mounted) setCount(0);
-      }
-    }
-    fetchCount();
-    const iv = setInterval(fetchCount, 15000);
-    return () => { mounted = false; clearInterval(iv); };
-  }, []);
-
-  // Handle form submit (join waitlist)
-  const handleJoin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setStatusMsg("");
+    setStatus("Submitting...");
 
-    const { error } = await supabase.from("signups").insert([
-      { name, email, tier: "waitlist" },
-    ]);
-
-    if (error) {
-      console.error(error);
-      setStatusMsg("❌ Database error: " + error.message);
-    } else {
-      setStatusMsg("✅ You're on the waitlist!");
-      setName("");
-      setEmail("");
-    }
-
-    setLoading(false);
+    const { error } = await supabase.from("waitlist").insert([form]);
+    setStatus(error ? "DB Error ❌" : "✅ Added to waitlist!");
   };
 
   return (
-  <React.Suspense fallback={<div style={{ color: "white", padding: 50 }}>Loading...</div>}>
     <>
       <Head>
-        <title>AutoDesk — Your computer, finally self-cleaning</title>
-        <meta
-          name="description"
-          content="AutoDesk auto-organizes and declutters your files with privacy-first local AI."
-        />
+        <title>AutoDesk — Auto tidy for your files</title>
       </Head>
 
-      <div className="heavy-root">
-        <header className="site-header">
-          <div className="brand">
-            <div className="logo-pill" />
-            <div>
-              <div className="brand-name">AutoDesk</div>
-              <div className="brand-tag">Auto tidy for your files</div>
-            </div>
-          </div>
-
-          <nav className="header-actions">
-            <div className="joined">
-              {count !== null ? `${count.toLocaleString()} joined` : "—"}
-            </div>
-            <button className="btn-ghost" onClick={() => setOpen(true)}>
-              Join waitlist
-            </button>
-          </nav>
-        </header>
-
-        <main className="page-container">
-          <section className="hero-and-metrics">
-            <div className="hero-left">
-              <Hero
-                onPrimary={() => setOpen(true)}
-                onSecondary={() =>
-                  setStatusMsg("Demo coming soon — stay tuned!")
-                }
-              />
-
-              <div className="big-metrics">
-                <motion.div
-                  className="metric-card"
-                  whileHover={{ y: -6 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="metric-title">Active waitlist</div>
-                  <div className="metric-value">
-                    {count !== null ? count.toLocaleString() : "…"}
-                  </div>
-                  <div className="metric-sub">
-                    Random 50 get{" "}
-                    <span
-                      style={{
-                        background:
-                          "linear-gradient(90deg, var(--neon1), var(--neon2))",
-                        WebkitBackgroundClip: "text",
-                        color: "transparent",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Lifetime Pro
-                    </span>{" "}
-                    • 25% pre-launch
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-
-            <aside className="hero-right">
-              <motion.div
-                className="launch-card"
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 }}
-              >
-                <div className="launch-title">Reserve your spot</div>
-                <div className="launch-sub">
-                  Random 50 get Lifetime Pro • 25% pre-launch
-                </div>
-
-                <form
-                  onSubmit={handleJoin}
-                  className="flex flex-col gap-3 mt-3"
-                  style={{ maxWidth: 320 }}
-                >
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="input"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="input"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary"
-                  >
-                    {loading ? "Joining..." : "Join waitlist"}
-                  </button>
-                </form>
-
-                {statusMsg && (
-                  <div
-                    className="small muted"
-                    style={{ marginTop: 12, color: "#9ef" }}
-                  >
-                    {statusMsg}
-                  </div>
-                )}
-              </motion.div>
-
-              <motion.div
-                className="visual-card"
-                initial={{ opacity: 0, y: 10 }}
+      <main className="heavy-root">
+        {/* Hero Section */}
+        <motion.section
+          className="hero-section"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <div className="hero-grid">
+            <div className="hero-text">
+              <motion.h1
+                className="hero-title"
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <div className="visual-title">How AutoDesk works</div>
-                <ol className="work-steps">
-                  <li>
-                    <strong>Scan</strong> — Smart analyze files locally.
-                  </li>
-                  <li>
-                    <strong>Suggest</strong> — Safe renames and groups.
-                  </li>
-                  <li>
-                    <strong>Apply</strong> — One click to clean up.
-                  </li>
-                </ol>
+                AutoDesk
+              </motion.h1>
+              <motion.p
+                className="hero-sub"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                Auto tidy for your files.
+                <br />
+                Your computer, finally self-cleaning.
+              </motion.p>
+
+              <div className="hero-ctas">
+                <motion.button
+                  className="btn-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Reserve your spot
+                </motion.button>
+                <motion.button
+                  className="btn-ghost"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  How it works
+                </motion.button>
+              </div>
+            </div>
+
+            <motion.div
+              className="hero-visual"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="orb"></div>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Waitlist Section */}
+        <motion.section
+          className="waitlist-section"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="waitlist-title">
+            Random 50 get <span>Lifetime Pro</span> • 25% pre-launch
+          </h2>
+
+          <form onSubmit={handleSubmit} className="waitlist-form">
+            <input
+              type="text"
+              placeholder="Your name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <input
+              type="email"
+              placeholder="Your email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+            <button type="submit">Join waitlist</button>
+          </form>
+
+          {status && <p className="waitlist-status">{status}</p>}
+        </motion.section>
+
+        {/* Features Section */}
+        <motion.section
+          className="features-heavy"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <h2 className="heavy-heading">How AutoDesk works</h2>
+          <p className="heavy-lead">
+            AutoDesk uses on-device AI to scan, rename, and declutter your files.
+            Your workspace — clean, private, and effortless.
+          </p>
+
+          <div className="features-grid">
+            {[
+              ["Smart Rename", "Semantic file renaming based on content and date."],
+              ["Auto Sort", "Automatically group into Documents, Photos, Code."],
+              ["Duplicate Finder", "Detect & remove duplicate files safely."],
+              ["Privacy-First", "Local-first processing; never upload without consent."],
+              ["One-Click Cleanup", "Preview and apply fixes with confidence."],
+              ["Integrations", "Connect cloud drives & local folders (optional)."],
+            ].map(([title, desc]) => (
+              <motion.div
+                key={title}
+                className="feature-card"
+                whileHover={{ scale: 1.05 }}
+              >
+                <h3>★ {title}</h3>
+                <p>{desc}</p>
               </motion.div>
-            </aside>
-          </section>
+            ))}
+          </div>
+        </motion.section>
 
-          <section className="features-heavy">
-            <h3 className="heavy-heading">Built for real life</h3>
-            <p className="heavy-lead">
-              Enterprise core, consumer polish — AutoDesk automates the tedious
-              file work so you can focus.
-            </p>
-            <FeatureGrid />
-          </section>
-
-          <footer className="site-foot">
-            <div>© AutoDesk • 2025</div>
-            <div className="muted">Privacy-first • Local-first • Fast</div>
-          </footer>
-        </main>
-
-        <WaitlistModal
-          open={open}
-          onClose={() => setOpen(false)}
-          onJoined={() => {
-            setOpen(false);
-            setStatusMsg("Thanks — you're on the list!");
-          }}
-        />
-      </div>
+        <footer className="site-foot">
+          © AutoDesk • 2025 <br /> Privacy-first • Local-first • Fast
+        </footer>
+      </main>
     </>
-  </React.Suspense>
-);
-
+  );
 }
