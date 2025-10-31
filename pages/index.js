@@ -71,30 +71,63 @@ export default function Home() {
           </header>
 
           <section className="hero-section" role="region" aria-labelledby="hero-heading">
-            <div className="hero-grid">
-              <div className="hero-left">
-                <TypewriterHero headline="Your computer, finally self-cleaning." />
-                <p className="hero-sub">AutoDesk uses on-device AI to scan, suggest, and clean — private by default.</p>
+  <div className="hero-grid">
+    <div className="hero-left fade-in">
+      <TypewriterHero headline="Your computer, finally self-cleaning." />
+      <p className="hero-sub">
+        AutoDesk uses on-device AI to scan, suggest, and clean — private by default.
+      </p>
 
-                <div className="hero-ctas" style={{ marginTop: 18 }}>
-                  <button className="btn-primary" onClick={() => window.scrollTo({ top: 700, behavior: "smooth" })}>Reserve your spot</button>
-                  <button className="btn-ghost">How it works</button>
-                </div>
+      <div className="hero-ctas" style={{ marginTop: 18 }}>
+        <button
+          className="btn-primary"
+          onClick={() => window.scrollTo({ top: 700, behavior: "smooth" })}
+        >
+          Reserve your spot
+        </button>
+        <button className="btn-ghost">How it works</button>
+      </div>
 
-                <div style={{ marginTop: 18 }}>
-                  <div className="big-metrics">
-                    <div className="metric-card"><div className="metric-title">Active waitlist</div><div className="metric-value">0</div></div>
-                    <div className="metric-card"><div className="metric-title">Pre-launch</div><div className="metric-value">25%</div></div>
-                  </div>
-                </div>
-              </div>
+      <div style={{ marginTop: 18 }}>
+        <div className="big-metrics">
+          <div className="metric-card fade-in" style={{ animationDelay: "0.2s" }}>
+            <div className="metric-title">Active waitlist</div>
+            <div className="metric-value">0</div>
+          </div>
+          <div className="metric-card fade-in" style={{ animationDelay: "0.4s" }}>
+            <div className="metric-title">Pre-launch</div>
+            <div className="metric-value">25%</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-              <div className="hero-visual" aria-hidden>
-                {/* small right-side mock illustration box */}
-                <div style={{ width: 340, height: 220, borderRadius: 16, background: "linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))" }} />
-              </div>
-            </div>
-          </section>
+    <div className="hero-visual parallax" aria-hidden>
+      {/* Background orb */}
+      <div className="orb-animated" />
+
+      {/* Foreground mock illustration */}
+      <motion.div
+        className="parallax-content fade-in"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        <div
+          style={{
+            width: 340,
+            height: 220,
+            borderRadius: 16,
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+            boxShadow: "0 0 30px rgba(0,255,255,0.08)",
+          }}
+        />
+      </motion.div>
+    </div>
+  </div>
+</section>
+
 
           <ParallaxLayers rootRef={pageRef}>
             <section className="waitlist-section" aria-labelledby="waitlist-heading">
