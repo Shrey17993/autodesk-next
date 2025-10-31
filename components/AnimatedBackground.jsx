@@ -2,7 +2,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import "./animatedBackground.css"; // optional if you prefer separate css file
+
 
 export default function AnimatedBackground() {
   const containerRef = useRef(null);
