@@ -1,16 +1,17 @@
 // pages/index.js
-console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_KEY ? 'Loaded ✅' : 'Missing ❌')
+console.log("SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+console.log("SUPABASE_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Loaded ✅" : "Missing ❌");
+
 
 import { motion } from "framer-motion";
-import { createClient } from "@supabase/supabase-js";
 import { Activity, Cpu, Users, Settings } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 
 export default function AliveDashboard() {
   const [users, setUsers] = useState(0);
