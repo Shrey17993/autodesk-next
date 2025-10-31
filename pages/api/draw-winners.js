@@ -1,8 +1,7 @@
 // pages/api/draw-winners.js
 import { supabaseAdmin } from '../../lib/supabaseAdmin';
 import sgMail from '@sendgrid/mail';
-import dotenv from 'dotenv';
-dotenv.config();
+
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
